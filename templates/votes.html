@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Voting Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .votes-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .votes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .restaurant-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .restaurant-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .restaurant-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .restaurant-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+            color: #333;
+        }
+
+        .vote-count {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .vote-label {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .vote-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .vote-btn:active {
+            transform: translateY(0);
+        }
+
+        .vote-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stats-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .total-votes {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .vote-success {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(34, 197, 94, 0.95);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .votes-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .restaurant-card {
+                padding: 20px;
+            }
+            
+            .logout-btn {
+                position: relative;
+                display: inline-block;
+                margin-bottom: 20px;
+            }
+        }
+
+        .restaurant-descriptions {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    
+    <div class="header">
+        <h1>🍽️ Restaurant Voting Dashboard</h1>
+        <p>Choose your favorite restaurant and cast your vote!</p>
+    </div>
+
+    <div class="votes-container">
+        <div class="votes-grid">
+            {% for restaurant in votes_data %}
+            <div class="restaurant-card" id="card-{{ restaurant.name }}">
+                <div class="restaurant-icon">
+                    {% if restaurant.name == 'outback' %}🥩
+                    {% elif restaurant.name == 'bucadibeppo' %}🍝
+                    {% elif restaurant.name == 'ihop' %}🥞
+                    {% elif restaurant.name == 'chipotle' %}🌯
+                    {% endif %}
+                </div>
+                <h3 class="restaurant-name">{{ restaurant.name.title().replace('bucadibeppo', 'Buca di Beppo').replace('ihop', 'IHOP') }}</h3>
+                <div class="restaurant-descriptions">
+                    {% if restaurant.name == 'outback' %}Steakhouse with Australian flair
+                    {% elif restaurant.name == 'bucadibeppo' %}Family-style Italian dining
+                    {% elif restaurant.name == 'ihop' %}All-day breakfast favorites
+                    {% elif restaurant.name == 'chipotle' %}Fresh Mexican grill
+                    {% endif %}
+                </div>
+                <div class="vote-count" id="count-{{ restaurant.name }}">{{ restaurant.votes }}</div>
+                <div class="vote-label">votes</div>
+                <button class="vote-btn" onclick="vote('{{ restaurant.name }}')">
+                    Vote for {{ restaurant.name.title().replace('bucadibeppo', 'Buca di Beppo').replace('ihop', 'IHOP') }}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="stats-section">
+            <h2 class="stats-title">📊 Total Votes</h2>
+            <div class="total-votes" id="total-votes">
+                {{ votes_data | sum(attribute='votes') }}
+            </div>
+            <div class="stats-label">votes cast so far</div>
+        </div>
+    </div>
+
+    <script>
+        async function vote(restaurant) {
+            // Disable all vote buttons temporarily
+            const buttons = document.querySelectorAll('.vote-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch('/api/vote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ restaurant: restaurant })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update the vote count with animation
+                    const countElement = document.getElementById(`count-${restaurant}`);
+                    const cardElement = document.getElementById(`card-${restaurant}`);
+                    
+                    countElement.textContent = data.votes;
+                    cardElement.classList.add('success-animation');
+                    
+                    // Update total votes
+                    const totalElement = document.getElementById('total-votes');
+                    const currentTotal = parseInt(totalElement.textContent);
+                    totalElement.textContent = currentTotal + 1;
+                    
+                    // Show success message
+                    showSuccessMessage(`Vote cast for ${restaurant.charAt(0).toUpperCase() + restaurant.slice(1)}!`);
+                    
+                    // Remove animation class after animation completes
+                    setTimeout(() => {
+                        cardElement.classList.remove('success-animation');
+                    }, 600);
+                    
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            } finally {
+                // Re-enable all vote buttons after a short delay
+                setTimeout(() => {
+                    buttons.forEach(btn => btn.disabled = false);
+                }, 1000);
+            }
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'vote-success';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 2000);
+        }
+
+        // Auto-refresh votes every 30 seconds to show updates from other users
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/getvotes');
+                if (response.ok) {
+                    const text = await response.text();
+                    const votes = JSON.parse(text);
+                    
+                    let total = 0;
+                    votes.forEach(vote => {
+                        const countElement = document.getElementById(`count-${vote.name}`);
+                        if (countElement) {
+                            countElement.textContent = vote.value;
+                            total += parseInt(vote.value);
+                        }
+                    });
+                    
+                    document.getElementById('total-votes').textContent = total;
+                }
+            } catch (error) {
+                // Silently fail - don't interrupt user experience
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
