@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -60,22 +61,50 @@
         }
 
         .votes-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
         }
 
         .votes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .chart-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
         }
 
         .restaurant-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: all 0.3s ease;
@@ -84,7 +113,7 @@
         }
 
         .restaurant-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-8px);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
         }
 
@@ -99,39 +128,39 @@
         }
 
         .restaurant-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
+            font-size: 3.5rem;
+            margin-bottom: 15px;
             display: block;
         }
 
         .restaurant-name {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: capitalize;
             color: #333;
         }
 
         .vote-count {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: #667eea;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .vote-label {
             color: #666;
-            margin-bottom: 20px;
-            font-size: 1rem;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
         }
 
         .vote-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 25px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -211,6 +240,39 @@
             20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
 
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .chart-section {
+                order: -1;
+            }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.5rem;
@@ -230,12 +292,16 @@
                 display: inline-block;
                 margin-bottom: 20px;
             }
+
+            .chart-container {
+                height: 250px;
+            }
         }
 
         .restaurant-descriptions {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #777;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-style: italic;
         }
     </style>
@@ -249,35 +315,47 @@
     </div>
 
     <div class="votes-container">
-        <div class="votes-grid">
-            {% for restaurant in votes_data %}
-            <div class="restaurant-card" id="card-{{ restaurant.name }}">
-                <div class="restaurant-icon">
-                    {% if restaurant.name == 'outback' %}🥩
-                    {% elif restaurant.name == 'bucadibeppo' %}🍝
-                    {% elif restaurant.name == 'ihop' %}🥞
-                    {% elif restaurant.name == 'chipotle' %}🌯
-                    {% endif %}
+        <div class="dashboard-grid">
+            <div class="votes-section">
+                <div class="votes-grid">
+                    {% for restaurant in votes_data %}
+                    <div class="restaurant-card" id="card-{{ restaurant.name }}">
+                        <div class="restaurant-icon">
+                            {% if restaurant.name == 'outback' %}🥩
+                            {% elif restaurant.name == 'bucadibeppo' %}🍝
+                            {% elif restaurant.name == 'ihop' %}🥞
+                            {% elif restaurant.name == 'chipotle' %}🌯
+                            {% endif %}
+                        </div>
+                        <h3 class="restaurant-name">{{ restaurant.name.title().replace('bucadibeppo', 'Buca di Beppo').replace('ihop', 'IHOP') }}</h3>
+                        <div class="restaurant-descriptions">
+                            {% if restaurant.name == 'outback' %}Steakhouse with Australian flair
+                            {% elif restaurant.name == 'bucadibeppo' %}Family-style Italian dining
+                            {% elif restaurant.name == 'ihop' %}All-day breakfast favorites
+                            {% elif restaurant.name == 'chipotle' %}Fresh Mexican grill
+                            {% endif %}
+                        </div>
+                        <div class="vote-count" id="count-{{ restaurant.name }}">{{ restaurant.votes }}</div>
+                        <div class="vote-label">votes</div>
+                        <button class="vote-btn" onclick="vote('{{ restaurant.name }}')">
+                            Vote for {{ restaurant.name.title().replace('bucadibeppo', 'Buca di Beppo').replace('ihop', 'IHOP') }}
+                        </button>
+                    </div>
+                    {% endfor %}
                 </div>
-                <h3 class="restaurant-name">{{ restaurant.name.title().replace('bucadibeppo', 'Buca di Beppo').replace('ihop', 'IHOP') }}</h3>
-                <div class="restaurant-descriptions">
-                    {% if restaurant.name == 'outback' %}Steakhouse with Australian flair
-                    {% elif restaurant.name == 'bucadibeppo' %}Family-style Italian dining
-                    {% elif restaurant.name == 'ihop' %}All-day breakfast favorites
-                    {% elif restaurant.name == 'chipotle' %}Fresh Mexican grill
-                    {% endif %}
-                </div>
-                <div class="vote-count" id="count-{{ restaurant.name }}">{{ restaurant.votes }}</div>
-                <div class="vote-label">votes</div>
-                <button class="vote-btn" onclick="vote('{{ restaurant.name }}')">
-                    Vote for {{ restaurant.name.title().replace('bucadibeppo', 'Buca di Beppo').replace('ihop', 'IHOP') }}
-                </button>
             </div>
-            {% endfor %}
+
+            <div class="chart-section">
+                <h2 class="chart-title">📊 Vote Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="votesChart"></canvas>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
         </div>
 
         <div class="stats-section">
-            <h2 class="stats-title">📊 Total Votes</h2>
+            <h2 class="stats-title">�️ Total Votes Cast</h2>
             <div class="total-votes" id="total-votes">
                 {{ votes_data | sum(attribute='votes') }}
             </div>
@@ -286,6 +364,120 @@
     </div>
 
     <script>
+        // Chart configuration
+        const chartColors = {
+            outback: '#e74c3c',      // Red for steakhouse
+            bucadibeppo: '#2ecc71',  // Green for Italian
+            ihop: '#f39c12',         // Orange for breakfast
+            chipotle: '#9b59b6'      // Purple for Mexican
+        };
+
+        const restaurantNames = {
+            outback: 'Outback Steakhouse',
+            bucadibeppo: 'Buca di Beppo',
+            ihop: 'IHOP',
+            chipotle: 'Chipotle'
+        };
+
+        // Initialize chart
+        let votesChart;
+
+        function initChart() {
+            const ctx = document.getElementById('votesChart').getContext('2d');
+            
+            // Get initial data
+            const data = [];
+            const labels = [];
+            const colors = [];
+            
+            {% for restaurant in votes_data %}
+            data.push({{ restaurant.votes }});
+            labels.push('{{ restaurant.name }}');
+            colors.push(chartColors['{{ restaurant.name }}']);
+            {% endfor %}
+
+            votesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels.map(name => restaurantNames[name]),
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color + '20'),
+                        borderWidth: 2,
+                        hoverBorderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // We'll create a custom legend
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed} votes (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000
+                    }
+                }
+            });
+
+            // Create custom legend
+            updateLegend();
+        }
+
+        function updateLegend() {
+            const legendContainer = document.getElementById('chartLegend');
+            legendContainer.innerHTML = '';
+            
+            votesChart.data.labels.forEach((label, index) => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.backgroundColor = votesChart.data.datasets[0].backgroundColor[index];
+                
+                const labelText = document.createElement('span');
+                labelText.textContent = label;
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(labelText);
+                legendContainer.appendChild(legendItem);
+            });
+        }
+
+        function updateChart() {
+            // Update chart data
+            const restaurants = ['outback', 'bucadibeppo', 'ihop', 'chipotle'];
+            restaurants.forEach((restaurant, index) => {
+                const countElement = document.getElementById(`count-${restaurant}`);
+                if (countElement) {
+                    votesChart.data.datasets[0].data[index] = parseInt(countElement.textContent);
+                }
+            });
+            
+            votesChart.update('none'); // Update without animation for real-time updates
+        }
+
         async function vote(restaurant) {
             // Disable all vote buttons temporarily
             const buttons = document.querySelectorAll('.vote-btn');
@@ -314,6 +506,9 @@
                     const totalElement = document.getElementById('total-votes');
                     const currentTotal = parseInt(totalElement.textContent);
                     totalElement.textContent = currentTotal + 1;
+                    
+                    // Update chart
+                    updateChart();
                     
                     // Show success message
                     showSuccessMessage(`Vote cast for ${restaurant.charAt(0).toUpperCase() + restaurant.slice(1)}!`);
@@ -366,11 +561,17 @@
                     });
                     
                     document.getElementById('total-votes').textContent = total;
+                    updateChart();
                 }
             } catch (error) {
                 // Silently fail - don't interrupt user experience
             }
         }, 30000);
+
+        // Initialize chart when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart();
+        });
     </script>
 </body>
 </html>
