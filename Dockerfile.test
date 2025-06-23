@@ -1,0 +1,37 @@
+FROM public.ecr.aws/bitnami/python:3.8-prod
+
+COPY . /app
+
+WORKDIR /app
+
+# Install production dependencies
+RUN pip install -r requirements.txt
+
+# Install test dependencies
+RUN pip install -r test_requirements.txt
+
+# Install OpenTelemetry
+RUN opentelemetry-bootstrap --action=install
+
+# Optional section for OpenTelemetry
+ENV OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=urllib3
+ENV OTEL_RESOURCE_ATTRIBUTES='service.name=votingapp'
+
+# Set test environment variables
+ENV DDB_AWS_REGION=us-east-1
+ENV DDB_TABLE_NAME=test-votingapp-restaurants
+ENV CPUSTRESSFACTOR=1
+ENV MEMSTRESSFACTOR=1
+
+# Create user for security
+RUN groupadd -r restaurantgroup && useradd -r -g restaurantgroup restaurantuser
+
+# Change ownership of app directory to the user
+RUN chown -R restaurantuser:restaurantgroup /app
+
+USER restaurantuser
+
+# Default command runs the application
+CMD OTEL_PROPAGATORS=xray OTEL_PYTHON_ID_GENERATOR=xray opentelemetry-instrument python3 -u app.py
+
+EXPOSE 8080

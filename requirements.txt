@@ -3,8 +3,8 @@
 Flask==2.0.3
 Flask-Cors==3.0.10
 Werkzeug==2.2.2
-boto3==1.17.12
-botocore==1.20.12
+boto3==1.26.76
+botocore==1.29.76
 simplejson==3.17.2
 opentelemetry-distro[otlp]>=0.24b0
 opentelemetry-sdk-extension-aws~=2.0
