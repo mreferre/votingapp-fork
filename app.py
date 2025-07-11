@@ -53,7 +53,30 @@ def updatevote(restaurant, votes):
 
 @app.route('/')
 def home():
-    return "<h1>Welcome to the Voting App</h1><p><b>To vote, you can call the following APIs:</b></p><p>/api/outback</p><p>/api/bucadibeppo</p><p>/api/ihop</p><p>/api/chipotle</p><b>To query the votes, you can call the following APIs:</b><p>/api/getvotes</p><p>/api/getheavyvotes (this generates artificial CPU/memory load)</p>"
+    return """<!DOCTYPE html>
+<html>
+<head>
+    <title>Voting App</title>
+    <style>
+        body {
+            background-color: red;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Voting App</h1>
+    <p><b>To vote, you can call the following APIs:</b></p>
+    <p>/api/outback</p>
+    <p>/api/bucadibeppo</p>
+    <p>/api/ihop</p>
+    <p>/api/chipotle</p>
+    <p><b>To query the votes, you can call the following APIs:</b></p>
+    <p>/api/getvotes</p>
+    <p>/api/getheavyvotes (this generates artificial CPU/memory load)</p>
+</body>
+</html>"""
 
 @app.route("/api/outback")
 def outback():
